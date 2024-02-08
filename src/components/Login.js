@@ -2,14 +2,16 @@ import React, { useRef, useState } from 'react'
 import Header from './Header'
 import mainimage from '../utils/mainimage.jpg'
 import { checkvaliddata } from '../utils/validate'
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { auth } from '../utils/Firebase';
+import { useNavigate } from 'react-router-dom';
 
 
 const Login = () => {
 
     const [issignin, setissignin] = useState(true)
     const [errormessage, seterrormessage] = useState(null)
+    const navigate=useNavigate()
 
     const email = useRef(null)
     const password = useRef(null)
@@ -29,7 +31,17 @@ const Login = () => {
                 .then((userCredential) => {
                     // Signed up 
                     const user = userCredential.user;
-                    console.log(user);
+                    updateProfile(auth.currentUser, {
+                        displayName: name.current.value, photoURL: "https://example.com/jane-q-user/profile.jpg"
+                      }).then(() => {
+                        // Profile updated!
+                        // ...
+                      }).catch((error) => {
+                        // An error occurred
+                        // ...
+                      });
+                    navigate('/browse')
+
                     // ...
                 })
                 .catch((error) => {
@@ -45,6 +57,7 @@ const Login = () => {
                     // Signed in 
                     const user = userCredential.user;
                     console.log(user)
+                    navigate('/browse')
                     // ...
                 })
                 .catch((error) => {
@@ -68,7 +81,7 @@ const Login = () => {
                 <input ref={email} type='text' placeholder='Email adress' className='p-4 my-4 w-full bg-gray-700' />
                 {issignin ?
                     '' :
-                    <input ref={name} type='text' placeholder='Full Name' className='p-4 my-4 w-full bg-gray-700' />
+                    <input  ref={name} type='text' placeholder='Full Name' className='p-4 my-4 w-full bg-gray-700' />
                 }
                 <input ref={password} type='password' placeholder='Password' className='p-4 my-4 w-full bg-gray-700' />
                 <p className='text-red-600'>{errormessage}</p>
