@@ -35,7 +35,7 @@ const Login = () => {
                 .catch((error) => {
                     const errorCode = error.code;
                     const errorMessage = error.message;
-                    seterrormessage('Invalid Credential')
+                    seterrormessage('Invalid User Credential')
                     // ..
                 });
         }
@@ -50,7 +50,7 @@ const Login = () => {
                 .catch((error) => {
                     const errorCode = error.code;
                     const errorMessage = error.message;
-                    seterrormessage('Invalid Credential')
+                    seterrormessage('Invalid User Credential')
                 });
 
         }
