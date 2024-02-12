@@ -4,15 +4,12 @@ import mainimage from '../utils/mainimage.jpg'
 import { checkvaliddata } from '../utils/validate'
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { auth } from '../utils/Firebase';
-import { useNavigate } from 'react-router-dom';
 
 
 const Login = () => {
 
     const [issignin, setissignin] = useState(true)
     const [errormessage, seterrormessage] = useState(null)
-    const navigate=useNavigate()
-
     const email = useRef(null)
     const password = useRef(null)
     const name = useRef(null)
@@ -40,7 +37,6 @@ const Login = () => {
                         // An error occurred
                         // ...
                       });
-                    navigate('/browse')
 
                     // ...
                 })
@@ -56,8 +52,6 @@ const Login = () => {
                 .then((userCredential) => {
                     // Signed in 
                     const user = userCredential.user;
-                    console.log(user)
-                    navigate('/browse')
                     // ...
                 })
                 .catch((error) => {
@@ -78,11 +72,11 @@ const Login = () => {
 
             <form onSubmit={(e) => e.preventDefault()} className=' w-3/12 absolute  p-12 bg-black my-36 mx-auto right-0 left-0 text-white bg-opacity-75'>
                 <h1 className='font-bold py-4 text-3xl'>{issignin ? 'Sign In' : 'Sign Up'}</h1>
-                <input ref={email} type='text' placeholder='Email adress' className='p-4 my-4 w-full bg-gray-700' />
                 {issignin ?
                     '' :
                     <input  ref={name} type='text' placeholder='Full Name' className='p-4 my-4 w-full bg-gray-700' />
                 }
+                <input ref={email} type='text' placeholder='Email adress' className='p-4 my-4 w-full bg-gray-700' />
                 <input ref={password} type='password' placeholder='Password' className='p-4 my-4 w-full bg-gray-700' />
                 <p className='text-red-600'>{errormessage}</p>
                 <button className='p-4 my-6  bg-red-700 w-full rounded-lg' onClick={handlebuttonclick}>{issignin ? 'Sign In' : 'Sign Up'}</button>
