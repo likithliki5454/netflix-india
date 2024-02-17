@@ -1,57 +1,94 @@
-import Netflix_user from '../utils/Netflix_user.jpg';
-import NetflixLogo from '../utils/Netflix_Logo.jpg';
-import { onAuthStateChanged, signOut } from 'firebase/auth';
-import { auth } from '../utils/Firebase';
-import { useNavigate } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
-import { useEffect } from 'react';
-import { addUser, removeUser } from '../utils/userSlice';
-
-
+import { onAuthStateChanged, signOut } from "firebase/auth";
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import {  SUPPORTED_LANGUAGES } from "../utils/constants";
+import LOGO from '../utils/Netflix_Logo.jpg'
+import { auth } from "../utils/firebase";
+import { addUser, removeUser } from "../utils/userSlice";
+import { toggleGptSearchView } from "../utils/gptSlice";
+import { changeLanguage } from "../utils/configSlice";
+import  USER_AVATAR  from "../utils/Netflix_user.jpg";
 
 const Header = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const user = useSelector((store) => store.user);
+  const showGptSearch = useSelector((store) => store.gpt.showGptSearch);
+  const handleSignOut = () => {
+    signOut(auth)
+      .then(() => {})
+      .catch((error) => {
+        navigate("/error");
+      });
+  };
 
-  const navigate=useNavigate()
-  const dispatch=useDispatch();
-
-  const user=useSelector((store)=>store.user)
-  const handleSignout=()=>{
-    signOut(auth).then(() => {
-    }).catch((error) => {
-      // An error happened.
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        const { uid, email, displayName, photoURL } = user;
+        dispatch(
+          addUser({
+            uid: uid,
+            email: email,
+            displayName: displayName,
+            photoURL: photoURL,
+          })
+        );
+        navigate("/browse");
+      } else {
+        dispatch(removeUser());
+        navigate("/");
+      }
     });
 
-  }
+    // Unsiubscribe when component unmounts
+    return () => unsubscribe();
+  }, []);
 
+  const handleGptSearchClick = () => {
+    // Toggle GPT Search
+    dispatch(toggleGptSearchView());
+  };
 
-
-    useEffect(()=>{
-    const unsubscribe=  onAuthStateChanged(auth, (user) => {
-          if (user) {
-            const {uid,email,displayName}=user
-            dispatch(addUser({uid:uid,email:email,displayName:displayName}))
-navigate('/browse')
-          } else {
-            dispatch(removeUser())
-            navigate('/')
-          }
-        });
-        return()=>unsubscribe()
-  },[])
-
-
+  const handleLanguageChange = (e) => {
+    dispatch(changeLanguage(e.target.value));
+  };
 
   return (
-    <div className='absolute w-full  px-8 py-2 bg-gradient-to-b from-black z-10 flex justify-between'>
-      <img className='w-44' src={NetflixLogo} alt="Netflix Logo" />
-    {user &&  
-      <div className='flex items-center p-2 m-2'>
-    <p className='p-2'>Welcome {user.displayName?user.displayName:'Guest' }</p>
-      <img className='w-8 h-8' alt='usericon' src={Netflix_user}/>
-      <button onClick={handleSignout} className='p-2 text-red-800 font-bold'>Sign Out</button>
-      </div>}
+    <div className="absolute w-[99vw] px-8 py-2 bg-gradient-to-b from-black z-10 flex flex-col md:flex-row justify-between">
+      <img className="w-44 mx-auto md:mx-0" src={LOGO} alt="logo" />
+      {user && (
+        <div className="flex p-2 justify-between">
+          {showGptSearch && (
+            <select
+              className="p-2 m-2 bg-gray-900 text-white"
+              onChange={handleLanguageChange}
+            >
+              {SUPPORTED_LANGUAGES.map((lang) => (
+                <option key={lang.identifier} value={lang.identifier}>
+                  {lang.name}
+                </option>
+              ))}
+            </select>
+          )}
+          <button
+            className="py-2 px-4 mx-4 my-2 bg-purple-800 text-white rounded-lg"
+            onClick={handleGptSearchClick}
+          >
+            {showGptSearch ? "Homepage" : "GPT Search"}
+          </button>
+          <img
+            className="hidden md:block w-12 h-12"
+            alt="usericon"
+            src={USER_AVATAR}
+          />
+          <button onClick={handleSignOut} className="font-bold text-red-900 ">
+            Sign Out
+          </button>
+        </div>
+      )}
     </div>
   );
-}
-
+};
 export default Header;
